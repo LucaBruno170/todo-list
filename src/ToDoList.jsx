@@ -43,7 +43,7 @@ function ToDoList() {
   }
   return (
     <div className="flex flex-col items-center border border-black">
-      <h1 className="uppercase py-5 text-2xl">ToDo List</h1>
+      <h1 className="uppercase py-5 font-bebas text-7xl">To-Do List</h1>
 
       <div>
         <input
@@ -51,6 +51,7 @@ function ToDoList() {
           placeholder="Enter a task..."
           value={newtask}
           onChange={handleInputChange}
+          className="border border-black"
         />
         <button onClick={addTask}>Add</button>
       </div>
