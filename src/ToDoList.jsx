@@ -57,7 +57,7 @@ function ToDoList() {
         />
         <button
           onClick={addTask}
-          className="text-white text-xl border border-white px-6"
+          className="text-white text-xl px-6 bg-green-600 hover:bg-green-500 font-bold"
         >
           Add
         </button>
@@ -67,13 +67,28 @@ function ToDoList() {
         {tasks.map((task, index) => (
           <li
             key={index}
-            className="text-white text-xl border border-white flex justify-between p-5"
+            className="text-xl bg-white flex justify-between items-center font-bold p-5 my-2"
           >
             <span>{task}</span>
-            <div>
-              <button onClick={() => deleteTask(index)}>Delete</button>
-              <button onClick={() => moveTaskUp(index)}>Up</button>
-              <button onClick={() => moveTaskDown(index)}>Down</button>
+            <div className="flex gap-4">
+              <button
+                onClick={() => deleteTask(index)}
+                className="bg-red-500 p-2 text-white hover:bg-red-400"
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => moveTaskUp(index)}
+                className="border border-gray-400 p-2 hover:opacity-70"
+              >
+                Up
+              </button>
+              <button
+                onClick={() => moveTaskDown(index)}
+                className="border border-gray-400 p-2 hover:opacity-70"
+              >
+                Down
+              </button>
             </div>
           </li>
         ))}
