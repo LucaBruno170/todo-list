@@ -1,11 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function ToDoList() {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState(() => {
+    const storedTasks = localStorage.getItem("tasks");
+    return storedTasks ? JSON.parse(storedTasks) : [];
+  });
   const [newtask, setNewTask] = useState("");
 
   function handleInputChange(event) {
     setNewTask(event.target.value);
+  }
+
+  function handleKeyDown(event) {
+    if (event.key === "Enter") {
+      addTask();
+    }
   }
 
   function addTask() {
@@ -41,6 +50,10 @@ function ToDoList() {
       setTasks(updatedTasks);
     }
   }
+  useEffect(() => {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }, [tasks]);
+
   return (
     <div className="flex flex-col items-center bg-black w-full h-screen border border-white">
       <h1 className="uppercase py-5 font-bebas text-7xl text-white">
@@ -53,6 +66,7 @@ function ToDoList() {
           placeholder="Enter a task..."
           value={newtask}
           onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           className="p-3 text-xl"
         />
         <button
