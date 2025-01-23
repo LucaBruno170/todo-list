@@ -55,7 +55,7 @@ function ToDoList() {
   }, [tasks]);
 
   return (
-    <div className="flex flex-col items-center bg-red-600 w-full h-screen border border-white">
+    <div className="flex flex-col items-center bg-black w-full h-screen border border-white">
       <h1 className="uppercase py-5 font-bebas text-7xl text-white">
         To-Do List
       </h1>
