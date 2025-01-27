@@ -55,36 +55,36 @@ function ToDoList() {
   }, [tasks]);
 
   return (
-    <div className="flex flex-col items-center bg-black w-full h-screen">
-      <h1 className="uppercase py-5 font-bebas text-7xl text-white">
+    <div className="flex flex-col items-center bg-black w-full min-h-screen">
+      <h1 className="uppercase py-5 font-bebas text-5xl xs:text-6xl sm:text-7xl text-white">
         To-Do List
       </h1>
 
-      <div className="flex w-1/4 justify-center gap-14">
+      <div className="flex xs:w-3/4 sm:w-1/4 justify-center gap-5 sm:gap-14">
         <input
           type="text"
           placeholder="Enter a task..."
           value={newtask}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          className="p-3 text-xl"
+          className="p-2 sm:p-3 text-xs sm:text-xl xs:max-sm:w-2/3"
         />
         <button
           onClick={addTask}
-          className="text-white text-xl px-6 bg-green-600 hover:bg-green-500 font-bold"
+          className="text-white text-xs sm:text-xl px-6 bg-green-600 hover:bg-green-500 font-bold"
         >
           Add
         </button>
       </div>
 
-      <ol className="w-1/3 my-10">
+      <ol className="xs:max-sm:w-2/3 sm:w-1/3 my-5 sm:my-10">
         {tasks.map((task, index) => (
           <li
             key={index}
-            className="text-xl bg-white flex justify-between items-center font-bold p-5 my-2"
+            className="text-xs sm:text-xl bg-white flex justify-between gap-5 items-center font-bold sm:p-5 my-2"
           >
-            <span>{task}</span>
-            <div className="flex gap-4">
+            <span className="px-5">{task}</span>
+            <div className="sm:flex sm:gap-4">
               <button
                 onClick={() => deleteTask(index)}
                 className="bg-red-500 p-2 text-white hover:bg-red-400"
