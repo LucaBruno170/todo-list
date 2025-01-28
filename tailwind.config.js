@@ -5,7 +5,7 @@ export default {
     extend: {
       screens: {
         xs: "480px",
-        sm: "700px",
+        sm: "800px",
       },
       fontFamily: {
         bebas: ["Bebas Neue", "sans-serif"],
