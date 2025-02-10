@@ -1,4 +1,11 @@
 import { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faTrash,
+  faPen,
+  faArrowUp,
+  faArrowDown,
+} from "@fortawesome/free-solid-svg-icons";
 
 function ToDoList() {
   const [tasks, setTasks] = useState(() => {
@@ -6,6 +13,8 @@ function ToDoList() {
     return storedTasks ? JSON.parse(storedTasks) : [];
   });
   const [newtask, setNewTask] = useState("");
+  const [editingTask, setEditingTask] = useState(null);
+  const [editText, setEditText] = useState("");
 
   function handleInputChange(event) {
     setNewTask(event.target.value);
@@ -15,6 +24,19 @@ function ToDoList() {
     if (event.key === "Enter") {
       addTask();
     }
+  }
+
+  function editTask(index) {
+    setEditingTask(index);
+    setEditText(tasks[index]);
+  }
+
+  function saveTask(index) {
+    const updatedTasks = [...tasks];
+    updatedTasks[index] = editText;
+    setTasks(updatedTasks);
+    setEditingTask(null);
+    setEditText("");
   }
 
   function addTask() {
@@ -67,11 +89,11 @@ function ToDoList() {
           value={newtask}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          className="p-2 sm:p-3 text-xs sm:text-xl xs:max-sm:w-2/3"
+          className="p-2 sm:p-3 text-xs sm:text-xl xs:max-sm:w-2/3 rounded-sm"
         />
         <button
           onClick={addTask}
-          className="text-white text-xs sm:text-xl px-6 bg-green-600 hover:bg-green-500 font-bold"
+          className="text-white text-xs sm:text-xl px-6 bg-green-600 hover:bg-green-500 font-bold rounded-sm"
         >
           Add
         </button>
@@ -83,26 +105,52 @@ function ToDoList() {
             key={index}
             className="text-xs sm:text-xl bg-white flex justify-between gap-5 items-center font-bold sm:p-5 my-2"
           >
-            <span className="px-5">{task}</span>
+            {editingTask === index ? (
+              <input
+                type="text"
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                className="p-2 sm:p-3 text-xs sm:text-xl xs:max-sm:w-full"
+              />
+            ) : (
+              <span className="px-5 max-w-64 break-words">{task}</span>
+            )}
             <div className="sm:flex sm:gap-4">
-              <button
-                onClick={() => deleteTask(index)}
-                className="bg-red-500 p-2 text-white hover:bg-red-400"
-              >
-                Delete
-              </button>
-              <button
-                onClick={() => moveTaskUp(index)}
-                className="border border-gray-400 p-2 hover:opacity-70"
-              >
-                Up
-              </button>
-              <button
-                onClick={() => moveTaskDown(index)}
-                className="border border-gray-400 p-2 hover:opacity-70"
-              >
-                Down
-              </button>
+              {editingTask === index ? (
+                <button
+                  onClick={() => saveTask(index)}
+                  className="bg-green-500 p-2 text-white hover:bg-green-400"
+                >
+                  Guardar
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => deleteTask(index)}
+                    className="bg-red-500 p-3 rounded-sm text-white hover:bg-red-400"
+                  >
+                    <FontAwesomeIcon icon={faTrash} />
+                  </button>
+                  <button
+                    onClick={() => editTask(index)}
+                    className="border border-gray-400 p-2 hover:opacity-70 rounded-sm"
+                  >
+                    <FontAwesomeIcon icon={faPen} />
+                  </button>
+                  <button
+                    onClick={() => moveTaskUp(index)}
+                    className="border border-gray-400 p-2 hover:opacity-70 rounded-sm"
+                  >
+                    <FontAwesomeIcon icon={faArrowUp} />
+                  </button>
+                  <button
+                    onClick={() => moveTaskDown(index)}
+                    className="border border-gray-400 p-2 hover:opacity-70 rounded-sm"
+                  >
+                    <FontAwesomeIcon icon={faArrowDown} />
+                  </button>
+                </>
+              )}
             </div>
           </li>
         ))}
