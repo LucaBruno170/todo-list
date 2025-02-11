@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTrash,
@@ -15,6 +15,7 @@ function ToDoList() {
   const [newtask, setNewTask] = useState("");
   const [editingTask, setEditingTask] = useState(null);
   const [editText, setEditText] = useState("");
+  const inputRef = useRef(null);
 
   function handleInputChange(event) {
     setNewTask(event.target.value);
@@ -29,6 +30,12 @@ function ToDoList() {
   function editTask(index) {
     setEditingTask(index);
     setEditText(tasks[index]);
+
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 0);
   }
 
   function saveTask(index) {
@@ -111,9 +118,17 @@ function ToDoList() {
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}
                 className="p-2 sm:p-3 text-xs sm:text-xl xs:max-sm:w-full"
+                ref={inputRef}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    saveTask(editingTask);
+                  }
+                }}
               />
             ) : (
-              <span className="px-5 max-w-64 break-words">{task}</span>
+              <span className="px-5 max-w-28 xs:max-w-60 sm:max-w-64 break-words">
+                {task}
+              </span>
             )}
             <div className="sm:flex sm:gap-4">
               {editingTask === index ? (
@@ -121,7 +136,7 @@ function ToDoList() {
                   onClick={() => saveTask(index)}
                   className="bg-green-500 p-2 text-white hover:bg-green-400"
                 >
-                  Guardar
+                  Save
                 </button>
               ) : (
                 <>
@@ -133,19 +148,19 @@ function ToDoList() {
                   </button>
                   <button
                     onClick={() => editTask(index)}
-                    className="border border-gray-400 p-2 hover:opacity-70 rounded-sm"
+                    className="border border-gray-400 p-3 sm:p-2 hover:opacity-70 rounded-sm"
                   >
                     <FontAwesomeIcon icon={faPen} />
                   </button>
                   <button
                     onClick={() => moveTaskUp(index)}
-                    className="border border-gray-400 p-2 hover:opacity-70 rounded-sm"
+                    className="border border-gray-400 p-3 sm:p-2 hover:opacity-70 rounded-sm"
                   >
                     <FontAwesomeIcon icon={faArrowUp} />
                   </button>
                   <button
                     onClick={() => moveTaskDown(index)}
-                    className="border border-gray-400 p-2 hover:opacity-70 rounded-sm"
+                    className="border border-gray-400 p-3 sm:p-2 hover:opacity-70 rounded-sm"
                   >
                     <FontAwesomeIcon icon={faArrowDown} />
                   </button>
