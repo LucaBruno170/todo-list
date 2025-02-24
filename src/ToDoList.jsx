@@ -1,11 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faTrash,
-  faPen,
-  faArrowUp,
-  faArrowDown,
-} from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faPen } from "@fortawesome/free-solid-svg-icons";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { v4 as uuidv4 } from "uuid";
 
 function ToDoList() {
   const [tasks, setTasks] = useState(() => {
@@ -27,58 +24,45 @@ function ToDoList() {
     }
   }
 
-  function editTask(index) {
-    setEditingTask(index);
-    setEditText(tasks[index]);
-
-    setTimeout(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }, 0);
+  function editTask(id) {
+    const taskToEdit = tasks.find((task) => task.id === id);
+    setEditingTask(id);
+    setEditText(taskToEdit.text);
+    setTimeout(() => inputRef.current?.focus(), 0);
   }
 
-  function saveTask(index) {
-    const updatedTasks = [...tasks];
-    updatedTasks[index] = editText;
-    setTasks(updatedTasks);
+  function saveTask(id) {
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === id ? { ...task, text: editText } : task
+      )
+    );
     setEditingTask(null);
     setEditText("");
   }
 
   function addTask() {
     if (newtask.trim() !== "") {
-      setTasks((t) => [...t, newtask]);
+      const newTaskObject = { id: uuidv4(), text: newtask };
+      setTasks((t) => [...t, newTaskObject]);
       setNewTask("");
     }
   }
 
-  function deleteTask(index) {
-    const updatedTasks = tasks.filter((_, i) => i !== index);
-    setTasks(updatedTasks);
+  function deleteTask(id) {
+    setTasks(tasks.filter((task) => task.id !== id));
   }
 
-  function moveTaskUp(index) {
-    if (index > 0) {
-      const updatedTasks = [...tasks];
-      [updatedTasks[index], updatedTasks[index - 1]] = [
-        updatedTasks[index - 1],
-        updatedTasks[index],
-      ];
-      setTasks(updatedTasks);
-    }
+  function onDragEnd(result) {
+    if (!result.destination) return;
+
+    const reorderedTasks = Array.from(tasks);
+    const [movedTask] = reorderedTasks.splice(result.source.index, 1);
+    reorderedTasks.splice(result.destination.index, 0, movedTask);
+
+    setTasks(reorderedTasks);
   }
 
-  function moveTaskDown(index) {
-    if (index < tasks.length - 1) {
-      const updatedTasks = [...tasks];
-      [updatedTasks[index], updatedTasks[index + 1]] = [
-        updatedTasks[index + 1],
-        updatedTasks[index],
-      ];
-      setTasks(updatedTasks);
-    }
-  }
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
@@ -88,7 +72,6 @@ function ToDoList() {
       <h1 className="uppercase py-5 font-bebas text-5xl xs:text-6xl sm:text-7xl text-white">
         To-Do List
       </h1>
-
       <div className="flex xs:w-3/4 sm:w-1/4 justify-center gap-5 sm:gap-14">
         <input
           type="text"
@@ -106,70 +89,76 @@ function ToDoList() {
         </button>
       </div>
 
-      <ol className="xs:max-sm:w-2/3 sm:w-1/3 my-5 sm:my-10">
-        {tasks.map((task, index) => (
-          <li
-            key={index}
-            className="text-xs sm:text-xl bg-white flex justify-between gap-5 items-center font-bold sm:p-5 my-2"
-          >
-            {editingTask === index ? (
-              <input
-                type="text"
-                value={editText}
-                onChange={(e) => setEditText(e.target.value)}
-                className="p-2 sm:p-3 text-xs sm:text-xl xs:max-sm:w-full"
-                ref={inputRef}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    saveTask(editingTask);
-                  }
-                }}
-              />
-            ) : (
-              <span className="px-5 max-w-28 xs:max-w-60 sm:max-w-64 break-words">
-                {task}
-              </span>
+      {/* Drag and Drop Context */}
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="w-full flex justify-center">
+          <Droppable droppableId="tasks">
+            {(provided) => (
+              <ol
+                className="xs:max-sm:w-2/3 sm:w-1/3 my-5 sm:my-10"
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+              >
+                {tasks.map((task, index) => (
+                  <Draggable key={task.id} draggableId={task.id} index={index}>
+                    {(provided) => (
+                      <li
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        className="text-xs sm:text-xl bg-white flex justify-between gap-5 items-center font-bold sm:p-5 my-2"
+                      >
+                        {editingTask === task.id ? (
+                          <input
+                            type="text"
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            className="p-2 sm:p-3 text-xs sm:text-xl xs:max-sm:w-full"
+                            ref={inputRef}
+                            onKeyDown={(e) =>
+                              e.key === "Enter" && saveTask(task.id)
+                            }
+                          />
+                        ) : (
+                          <span className="px-5 max-w-28 xs:max-w-60 sm:max-w-64 break-words">
+                            {task.text}
+                          </span>
+                        )}
+                        <div className="sm:flex sm:gap-4">
+                          {editingTask === task.id ? (
+                            <button
+                              onClick={() => saveTask(task.id)}
+                              className="bg-green-500 p-2 text-white hover:bg-green-400"
+                            >
+                              Save
+                            </button>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => deleteTask(task.id)}
+                                className="bg-red-500 p-3 rounded-sm text-white hover:bg-red-400"
+                              >
+                                <FontAwesomeIcon icon={faTrash} />
+                              </button>
+                              <button
+                                onClick={() => editTask(task.id)}
+                                className="border border-gray-400 p-3 sm:p-2 hover:opacity-70 rounded-sm"
+                              >
+                                <FontAwesomeIcon icon={faPen} />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </li>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </ol>
             )}
-            <div className="sm:flex sm:gap-4">
-              {editingTask === index ? (
-                <button
-                  onClick={() => saveTask(index)}
-                  className="bg-green-500 p-2 text-white hover:bg-green-400"
-                >
-                  Save
-                </button>
-              ) : (
-                <>
-                  <button
-                    onClick={() => deleteTask(index)}
-                    className="bg-red-500 p-3 rounded-sm text-white hover:bg-red-400"
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                  </button>
-                  <button
-                    onClick={() => editTask(index)}
-                    className="border border-gray-400 p-3 sm:p-2 hover:opacity-70 rounded-sm"
-                  >
-                    <FontAwesomeIcon icon={faPen} />
-                  </button>
-                  <button
-                    onClick={() => moveTaskUp(index)}
-                    className="border border-gray-400 p-3 sm:p-2 hover:opacity-70 rounded-sm"
-                  >
-                    <FontAwesomeIcon icon={faArrowUp} />
-                  </button>
-                  <button
-                    onClick={() => moveTaskDown(index)}
-                    className="border border-gray-400 p-3 sm:p-2 hover:opacity-70 rounded-sm"
-                  >
-                    <FontAwesomeIcon icon={faArrowDown} />
-                  </button>
-                </>
-              )}
-            </div>
-          </li>
-        ))}
-      </ol>
+          </Droppable>
+        </div>
+      </DragDropContext>
     </div>
   );
 }
