@@ -7,8 +7,14 @@ import { v4 as uuidv4 } from "uuid";
 function ToDoList() {
   const [tasks, setTasks] = useState(() => {
     const storedTasks = localStorage.getItem("tasks");
-    return storedTasks ? JSON.parse(storedTasks) : [];
+    try {
+      const parsedTasks = JSON.parse(storedTasks);
+      return Array.isArray(parsedTasks) ? parsedTasks : [];
+    } catch {
+      return [];
+    }
   });
+
   const [newtask, setNewTask] = useState("");
   const [editingTask, setEditingTask] = useState(null);
   const [editText, setEditText] = useState("");
@@ -26,6 +32,7 @@ function ToDoList() {
 
   function editTask(id) {
     const taskToEdit = tasks.find((task) => task.id === id);
+    if (!taskToEdit) return;
     setEditingTask(id);
     setEditText(taskToEdit.text);
     setTimeout(() => inputRef.current?.focus(), 0);
@@ -54,6 +61,7 @@ function ToDoList() {
   }
 
   function onDragEnd(result) {
+    console.log("Drag Result:", result);
     if (!result.destination) return;
 
     const reorderedTasks = Array.from(tasks);
